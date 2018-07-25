@@ -61,9 +61,9 @@ public class PetProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         mDbHelper = new PetDbHelper(getContext());
-        return false;
+        return true;
     }
-
+    
     /**
      * Returns the MIME type of data for the content URI.
      */
