@@ -121,6 +121,10 @@ public class CatalogActivity extends AppCompatActivity {
 
         PetCursorAdapter cursorAdapter = new PetCursorAdapter(this, cursor, 0 /*do not like this*/);
         petListView.setAdapter(cursorAdapter);
+
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
     }
 
 }
