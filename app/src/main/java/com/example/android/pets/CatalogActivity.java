@@ -21,14 +21,18 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract.PetEntry;
 import com.example.android.pets.model.PetCursorAdapter;
@@ -36,7 +40,12 @@ import com.example.android.pets.model.PetCursorAdapter;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private PetCursorAdapter mPetCursorAdapter = new PetCursorAdapter(this, null, 0);
+
+    // Defines the id of the loader for later reference
+    public static final int PETS_LOADER_ID = 42;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +62,14 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        displayDatabaseInfo();
-    }
+        ListView petListView = findViewById(R.id.list_view_pet);
+        petListView.setAdapter(mPetCursorAdapter);
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
+
+        getSupportLoaderManager().initLoader(PETS_LOADER_ID, null, this);
     }
 
     @Override
@@ -77,7 +87,6 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertDummyPet();
-                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -103,28 +112,26 @@ public class CatalogActivity extends AppCompatActivity {
         Log.w("ciaoooooo", "New Row ID:" + newRowId);
     }
 
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
 
-        ListView petListView = findViewById(R.id.list_view_pet);
+        String[] projection = new String[]{PetEntry._ID, PetEntry.COLUMN_PET_NAME, PetEntry.COLUMN_PET_BREED};
+        return new CursorLoader(this, PetEntry.CONTENT_URI, projection, null, null, null);
+    }
 
-        // Perform this SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = getContentResolver().query(PetEntry.CONTENT_URI, null, null, null, null);
-        if (cursor == null) {
-            Toast.makeText(this, "Cursor returned is null", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
 
-        PetCursorAdapter cursorAdapter = new PetCursorAdapter(this, cursor, 0 /*do not like this*/);
-        petListView.setAdapter(cursorAdapter);
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mPetCursorAdapter.swapCursor(data);
+    }
 
-        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
-        View emptyView = findViewById(R.id.empty_view);
-        petListView.setEmptyView(emptyView);
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+        // Clear the Cursor we were using with another call to the swapCursor()
+        mPetCursorAdapter.swapCursor(null);
     }
 
 }
