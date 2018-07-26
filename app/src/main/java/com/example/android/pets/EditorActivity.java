@@ -70,6 +70,14 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
+        // If the user opens the activity by clicking on a pet item,
+        // he wants to edit it
+        if (getIntent().getData() != null) {
+            setTitle(R.string.editor_activity_title_edit_pet);
+        } else {
+            setTitle(R.string.editor_activity_title_new_pet);
+        }
+
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.edit_pet_name);
         mBreedEditText = findViewById(R.id.edit_pet_breed);
