@@ -145,9 +145,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /**
-     * Get user input from editor and save new pet on db
+     * Get user input from editor and save pet on db
      */
-    private void insertPet() {
+    private void savePet() {
         String name = mNameEditText.getText().toString().trim();
         String breed = mBreedEditText.getText().toString().trim();
         int gender = mGender;
@@ -159,12 +159,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(PetEntry.COLUMN_PET_GENDER, gender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weight);
 
-        Uri resultUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
         String msg;
-        if (resultUri != null) {
-            msg = getString(R.string.editor_insert_pet_successful);
+        if (mCurrentPetUri != null) {
+            int rowsUpdated = getContentResolver().update(mCurrentPetUri, values, null, null);
+            if (rowsUpdated > 0) {
+                msg = getString(R.string.editor_update_pet_successful);
+            } else {
+                msg = getString(R.string.editor_update_pet_failed);
+            }
         } else {
-            msg = getString(R.string.editor_insert_pet_failed);
+            Uri resultUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+            if (resultUri != null) {
+                msg = getString(R.string.editor_insert_pet_successful);
+            } else {
+                msg = getString(R.string.editor_insert_pet_failed);
+            }
         }
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
@@ -183,7 +192,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                insertPet();
+                savePet();
                 //exit activity
                 finish();
                 return true;
