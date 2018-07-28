@@ -84,7 +84,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      */
     private Uri mCurrentPetUri;
 
-    private boolean mPetHasChanged = false;
+    private static final String STATE_PET_HAS_CHANGED = "pet_has_changed";
+    private boolean mPetHasChanged;
 
     // OnTouchListener that listens for any user touches on a View, implying that they are modifying
     // the view, and we change the mPetHasChanged boolean to true.
@@ -100,6 +101,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
+
+        if (savedInstanceState == null) {
+            mPetHasChanged = false;
+        } else {
+            mPetHasChanged = savedInstanceState.getBoolean(STATE_PET_HAS_CHANGED);
+        }
 
         // If the user opens the activity by clicking on a pet item,
         // he wants to edit it
@@ -123,6 +130,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mGenderSpinner.setOnTouchListener(mOnTouchListener);
 
         setupSpinner();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(STATE_PET_HAS_CHANGED, mPetHasChanged);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     /**
