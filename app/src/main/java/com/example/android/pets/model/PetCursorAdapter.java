@@ -3,6 +3,7 @@ package com.example.android.pets.model;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import com.example.android.pets.data.PetContract.PetEntry;
  * how to create list items for each row of pet data in the {@link Cursor}.
  */
 public class PetCursorAdapter extends CursorAdapter {
-    
+
     /**
      * Constructs a new {@link PetCursorAdapter}.
      *
@@ -64,6 +65,7 @@ public class PetCursorAdapter extends CursorAdapter {
 
         String currentName = cursor.getString(cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME));
         String currentBreed = cursor.getString(cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED));
+        currentBreed = TextUtils.isEmpty(currentBreed) ? context.getString(R.string.breed_unknown) : currentBreed;
 
         nameView.setText(currentName);
         summaryView.setText(currentBreed);
